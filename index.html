@@ -5,23 +5,16 @@
     <meta charset="utf-8">
     <title>SVG to RN SVG</title>
     <meta name="author" content="ErkanSensei">
-    <style type="text/css" media="screen">
-    #editor {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-    }
-    </style>
-    <link rel="stylesheet" href="css/styles.css?v=1.0">
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-	<div><p>HELLO WORLD</p></div>
-	<div id="editor">//Paste SVG here</div>
-    <script src="svgToRNSVG.js"></script>
+	<script src="svgToRNSVG.js"></script>
     <script src="src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+	<div id="menu">
+		<button onclick="fixSVGText()">Submit</button>
+	</div>
+	<div id="editor">//Paste SVG here</div>
 <script>
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");

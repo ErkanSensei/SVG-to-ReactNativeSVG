@@ -13,7 +13,7 @@ String.prototype.replaceAt=function(index, replacement) {
 }
 
 function fixSVGText() {
-    var text = document.getElementById('Text1').value;
+    var text = editor.getValue();
     const openTags = text.match(/\<(.*?)\ /g);
 
     if (openTags !== null) {
@@ -22,6 +22,18 @@ function fixSVGText() {
             let element = openTag.match(/\<(.*?)\s/);
             if (element[1] !== "svg") {
                 text = text.replace(regExpTag, '<Svg.' + element[1].charAt(0).toUpperCase() + element[1].slice(1) + ' ')
+            }
+        })
+    }
+
+    const openTagsNoSpace = text.match(/\<(.*?)\>(.*?)/g);
+
+    if (openTagsNoSpace !== null) {
+        openTagsNoSpace.map(openTag => {
+            const regExpTag = new RegExp(openTag);
+            let element = openTag.match(/\<(.*?)\>(.*?)/);
+            if (element[1] !== "svg" && element.input.indexOf('/') === -1) {
+                text = text.replace(regExpTag, '<Svg.' + element[1].charAt(0).toUpperCase() + element[1].slice(1) + '>')
             }
         })
     }
@@ -82,7 +94,7 @@ function fixSVGText() {
     text = text.replace(new RegExp('styleStroke', 'g'), 'stroke');
 
     console.log(text)
-    document.getElementById('Text2').innerHTML = text;
+    editor.setValue(text);
     // const leftOverStyles = text.match(/style/g);
 
     // if (leftOverStyles !== null) {

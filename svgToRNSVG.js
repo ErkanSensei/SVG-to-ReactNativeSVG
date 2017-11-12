@@ -4,7 +4,12 @@ function parseCSSText(cssText) {
     var style = {}, [, ruleName, rule] = cssText.match(/(.*){([^}]*)}/)||[,,cssText];
     var cssToJs = s => s.replace(/[\W]+\w/g, match => match.slice(-1).toUpperCase());
     var properties = rule.split(";").map(o => o.split(":").map(x => x && x.trim()));
-    for (var [property, value] of properties) style[cssToJs(property)] = value;
+    console.log(properties);
+    for (var [property, value] of properties) {
+        if (property.length > 0) {
+            style[cssToJs(property)] = value;
+        }
+    }
     return {cssText, ruleName: ruleName && ruleName.trim(), style};
 }
 
@@ -14,6 +19,11 @@ String.prototype.replaceAt=function(index, replacement) {
 
 function fixSVGText() {
     var text = editor.getValue();
+
+    text = text.replace(new RegExp(/\<?(.*?)\?>(.*?)/, 'g'), ''); // remove all xml headers
+    text = text.replace(new RegExp(/\<!(.*?)\->(.*?)/, 'g'), ''); // remove all comments
+    text = text.replace(new RegExp(/\xml(.*?)\"(.*?)\"(.*?)/, 'g'), ''); // remove all xml namespaces
+
     const openTags = text.match(/\<(.*?)\ /g);
 
     if (openTags !== null) {
@@ -57,7 +67,10 @@ function fixSVGText() {
 
     if (dashes !== null) {
         dashes.map(dash => {
-            if (isNaN(Number(dash))) {
+            console.log(dash)
+            const checkDash = dash.split('-');
+            console.log(checkDash)
+            if (isNaN(Number(dash)) && isNaN(Number(checkDash[1]))) {
                 const regExpTag = new RegExp(dash);
                 let element = dash.match(/-/);
                 const index = element['index'];
@@ -68,7 +81,6 @@ function fixSVGText() {
             }
         })
     }
-
     text = text.replace(new RegExp('svg', 'g'), 'Svg');
     text = text.replace(new RegExp('stroke-linecap', 'g'), 'strokeLinecap');
     text = text.replace(new RegExp('transform=""', 'g'), '');
@@ -91,9 +103,10 @@ function fixSVGText() {
         })
         text = text.replace(placeHolders[i], newStyles);
     }
-    text = text.replace(new RegExp('styleStroke', 'g'), 'stroke');
-
-    console.log(text)
+    // text = text.replace(new RegExp('styleStroke', 'g'), 'stroke');
+    text = text.replace(/^\s*\n/gm, '');
+    text = text.replace(/ +(?= )/g,''); // replace multiple spaces with 1 space
+    
     editor.setValue(text);
     // const leftOverStyles = text.match(/style/g);
 

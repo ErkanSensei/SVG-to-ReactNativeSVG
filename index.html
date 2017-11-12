@@ -14,11 +14,14 @@
 	<div id="menu">
 		<button onclick="fixSVGText()">Submit</button>
 	</div>
-	<div id="editor">//Paste SVG here</div>
+	<div id="editor"></div>
 <script>
     var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/monokai");
-    editor.getSession().setMode("ace/mode/javascript");
+    editor.setTheme("ace/theme/solarized_dark");
+    editor.setOptions({
+    	fontSize: "16px"
+    })
+    editor.getSession().setMode("ace/mode/svg");
 </script>	
 </body>
 

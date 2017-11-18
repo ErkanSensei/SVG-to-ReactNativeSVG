@@ -1,28 +1,35 @@
 function parseCSSText(cssText) {
     cssText = cssText.replace('style=', '');
-    cssText = cssText.replace(/"/g, '');
-    var style = {}, [, ruleName, rule] = cssText.match(/(.*){([^}]*)}/)||[,,cssText];
-    var cssToJs = s => s.replace(/[\W]+\w/g, match => match.slice(-1).toUpperCase());
-    var properties = rule.split(";").map(o => o.split(":").map(x => x && x.trim()));
-    console.log(properties);
-    for (var [property, value] of properties) {
+    cssText = cssText.replace(/"/g, '');    
+    let style = {},
+        [, ruleName, rule] = cssText.match(/(.*){([^}]*)}/) || [, , cssText];    
+    let cssToJs = s => s.replace(/[\W]+\w/g, match => match.slice(-1).toUpperCase());    
+    let properties = rule.split(";").map(o => o.split(":").map(x => x && x.trim()));    
+    for (let [property, value] of properties) {
         if (property.length > 0) {
             style[cssToJs(property)] = value;
         }
-    }
-    return {cssText, ruleName: ruleName && ruleName.trim(), style};
+    }    
+    return { cssText, ruleName: ruleName && ruleName.trim(), style };
 }
 
-String.prototype.replaceAt=function(index, replacement) {
-    return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
+String.prototype.replaceAt = function(index, replacement) {
+    return this.substr(0, index) + replacement + this.substr(index + replacement.length);
 }
 
 function fixSVGText() {
-    var text = editor.getValue();
+    let text = editor.getValue();
+    const expo = document.querySelector('.filled-in:checked');
 
     text = text.replace(new RegExp(/\<?(.*?)\?>(.*?)/, 'g'), ''); // remove all xml headers
     text = text.replace(new RegExp(/\<!(.*?)\->(.*?)/, 'g'), ''); // remove all comments
     text = text.replace(new RegExp(/\xml(.*?)\"(.*?)\"(.*?)/, 'g'), ''); // remove all xml namespaces
+    text = text.replace(/\<!(.*?)\>(.*?)/g, '');
+    let elements = text.match(/<([\s\S]*?)>/g);
+
+    elements.map(element => {
+        text = text.replace(element, element.replace(/(?:\r\n|\r|\n)/g, ''));
+    })
 
     const openTags = text.match(/\<(.*?)\ /g);
 
@@ -30,8 +37,9 @@ function fixSVGText() {
         openTags.map(openTag => {
             const regExpTag = new RegExp(openTag);
             let element = openTag.match(/\<(.*?)\s/);
-            if (element[1] !== "svg") {
-                text = text.replace(regExpTag, '<Svg.' + element[1].charAt(0).toUpperCase() + element[1].slice(1) + ' ')
+            if (element.input.indexOf('svg') === -1 && element.input.indexOf('/') === -1 && element.input.indexOf('Svg') === -1) {
+                const prefix = expo ? '<Svg.' : '<';
+                text = text.replace(regExpTag, prefix + element[1].charAt(0).toUpperCase() + element[1].slice(1) + ' ')
             }
         })
     }
@@ -42,8 +50,10 @@ function fixSVGText() {
         openTagsNoSpace.map(openTag => {
             const regExpTag = new RegExp(openTag);
             let element = openTag.match(/\<(.*?)\>(.*?)/);
-            if (element[1] !== "svg" && element.input.indexOf('/') === -1) {
-                text = text.replace(regExpTag, '<Svg.' + element[1].charAt(0).toUpperCase() + element[1].slice(1) + '>')
+            console.log(element[1])
+            if (element.input.indexOf('svg') === -1 && element.input.indexOf('/') === -1 && element.input.indexOf('Svg') === -1) {
+                const prefix = expo ? '<Svg.' : '<';
+                text = text.replace(regExpTag, prefix + element[1].charAt(0).toUpperCase() + element[1].slice(1) + '>')
             }
         })
     }
@@ -56,8 +66,9 @@ function fixSVGText() {
                 const regExpTag = new RegExp(closeTag);
                 let element = closeTag.match(/\<(.*?)\>(.*?)/);
                 element[1] = element[1].replace('/', '');
-                if (element[1] !== "svg") {
-                    text = text.replace(regExpTag, '</Svg.' + element[1].charAt(0).toUpperCase() + element[1].slice(1) + '>')
+                if (element.input.indexOf('svg') === -1 && element.input.indexOf('Svg') === -1) {
+                    const prefix = expo ? '</Svg.' : '</';
+                    text = text.replace(regExpTag, prefix + element[1].charAt(0).toUpperCase() + element[1].slice(1) + '>')
                 }
             }
         })
@@ -67,10 +78,8 @@ function fixSVGText() {
 
     if (dashes !== null) {
         dashes.map(dash => {
-            console.log(dash)
             const checkDash = dash.split('-');
-            console.log(checkDash)
-            if (isNaN(Number(dash)) && isNaN(Number(checkDash[1]))) {
+            if (isNaN(Number(dash)) && isNaN(Number(checkDash[1][0]))) {
                 const regExpTag = new RegExp(dash);
                 let element = dash.match(/-/);
                 const index = element['index'];
@@ -86,8 +95,9 @@ function fixSVGText() {
     text = text.replace(new RegExp('transform=""', 'g'), '');
     text = text.replace(new RegExp('defs', 'g'), 'Svg.Defs');
 
-    var styles = text.match(/style=(["'])(?:(?=(\\?))\2.)*?\1/g);
-    var placeHolders = text.match(/style=(["'])(?:(?=(\\?))\2.)*?\1/g);
+
+    let styles = text.match(/style=(["'])(?:(?=(\\?))\2.)*?\1/g);
+    let placeHolders = text.match(/style=(["'])(?:(?=(\\?))\2.)*?\1/g);
 
     styles = styles !== null ? styles.map(item => {
         return parseCSSText(item).style;
@@ -95,7 +105,7 @@ function fixSVGText() {
 
     for (var i = 0; i < styles.length; i++) {
         var newStyles = '';
-        Object.keys(styles[i]).forEach((key,index) => {
+        Object.keys(styles[i]).forEach((key, index) => {
             if (key === '"') {
                 return
             }
@@ -105,16 +115,27 @@ function fixSVGText() {
     }
     // text = text.replace(new RegExp('styleStroke', 'g'), 'stroke');
     text = text.replace(/^\s*\n/gm, '');
-    text = text.replace(/ +(?= )/g,''); // replace multiple spaces with 1 space
-    
-    editor.setValue(text);
-    // const leftOverStyles = text.match(/style/g);
+    text = text.replace(/ +(?= )/g, ''); // replace multiple spaces with 1 space
+    if (expo) {
+        text = "import React from 'react'; \nimport { Svg } from 'expo';\n\nexport default (props) => {\n" + text + '}';
+    } else {
+        const tags = text.match(/\<(.*?)\>(.*?)/g);
+        const imports = [];
+        tags.map(tag => {
+            const splitTag = tag.split(' ');
+            let componentToImport = splitTag[0];
+            componentToImport = componentToImport.replace('<', '');
+            componentToImport = componentToImport.replace('/', '');
+            componentToImport = componentToImport.replace('>', '');
+            if (imports.indexOf(componentToImport) === -1 &&
+                componentToImport !== 'Svg') {
+                imports.push(componentToImport);
+            }
 
-    // if (leftOverStyles !== null) {
-    //     leftOverStyles.map(style => {
-    //         const regExpTag = new RegExp(style);
-    //         let element = text.match(/style/);
-    //         console.log(element)
-    //     })
-    // }
+        })
+        text = "import React from 'react'; \nimport Svg, { " + imports.join(', ') + " } from 'react-native-svg';\n\nexport default (props) => {\n" + text + '}';
+    }
+    text = js_beautify(text, { e4x: true });
+    editor.setValue(text);
+
 }

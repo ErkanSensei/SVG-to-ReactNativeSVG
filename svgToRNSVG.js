@@ -33,11 +33,11 @@ String.prototype.replaceAt = function(index, replacement) {
 
 function fixSVGText() {
     let text = editor.getValue();
-    text = js_beautify(text, { e4x: true });
     text = text.replace(/\<?(.*?)\?>(.*?)/g, ''); // remove all xml headers
     text = text.replace(/\<!(.*?)\->(.*?)/g, ''); // remove all comments
     text = text.replace(/\xml(.*?)\"(.*?)\"(.*?)/g, ''); // remove all xml namespaces
     text = text.replace(/\<!(.*?)\>(.*?)/g, '');
+    text = js_beautify(text, { e4x: true });
     let elements = text.match(/<([\s\S]*?)>/g);
 
     elements.map(element => {
@@ -91,7 +91,6 @@ function fixSVGText() {
     if (dashes !== null) {
         dashes.map(dash => {
             const checkDash = dash.split('-');
-            console.log(checkDash);
             let checkDashFirstLetter = checkDash[1][0];
             if (checkDash[1] === '') {
                 checkDashFirstLetter = false;
@@ -105,7 +104,6 @@ function fixSVGText() {
                 const index = element['index'];
                 const originalInput = element['input'];
                 element['input'] = element['input'].replace('-', '');
-                console.log(element)
                 element['input'] = element['input'].replaceAt(index, element['input'][index].toUpperCase())
                 text = text.replace(originalInput, element['input'])
             }
@@ -155,6 +153,33 @@ function fixSVGText() {
         })
         text = "import React from 'react'; \nimport Svg, { " + imports.join(', ') + " } from 'react-native-svg';\n\nexport default (props) => {\n" + text + '}';
     }
+
+    const tags = text.match(/\<(.*?)\>(.*?)/g);
+    tags.map(tag => {
+        const splitTag = tag.split(' ');
+        splitTag.map(item => {
+            if (item.indexOf('width="') > -1) {
+                let tempItem = item.replace('width="', 'width={');
+                tempItem = tempItem.replace('"', '}');
+                tempItem = tempItem.replace('px', '');
+                text = text.replace(item, tempItem);
+            }
+            else if (item.indexOf('height="') > -1) {
+                let tempItem = item.replace('height="', 'height={');
+                tempItem = tempItem.replace('"', '}');
+                tempItem = tempItem.replace('px', '');
+                text = text.replace(item, tempItem);
+            }
+        })
+        if (tag.indexOf('<Svg') > -1 
+                && tag.indexOf('width="') === -1
+                && tag.indexOf('height="') === -1) {
+                let tempItem = splitTag[0] + ' width={props.width} height={props.height}';
+                text = text.replace(splitTag[0], tempItem);
+            }
+
+    })
+
     text = js_beautify(text, { e4x: true });
     editor.setValue(text);
 

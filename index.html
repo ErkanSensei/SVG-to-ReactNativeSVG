@@ -9,10 +9,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.7.4/beautify-css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.7.4/beautify-html.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <!-- Compiled and minified CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-83354786-2"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'UA-83354786-2');
+    </script>
     <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -21,12 +32,19 @@
     <script src="src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.7.4/beautify-html.js"></script>
     <div id="menu">
+        <img id="logo" src="reactLogo.png" />
+        <div id="opener">
+            <p>Paste your SVG code on the right, and it will be converted to a React Native component.</p>
+        </div>
+        <div id="expoContainer">
+            <button class="btn submit" id="rnButton" onclick="expoCheck('react')">React
+            </button>
+            <button class="btn submit" id="expoButton" onclick="expoCheck('expo')">Expo
+            </button>
+        </div>
         <button class="waves-effect waves-light btn red darken-4 submit" id="submit" onclick="fixSVGText()">Submit
         </button>
-        <div id="propsCheck">
-            <input type="checkbox" class="filled-in checkbox-red" id="filled-in-box" checked="checked" />
-            <label id="checkLabel" for="filled-in-box">Expo</label>
-        </div>
+        <a target="_blank" href="https://github.com/ErkanSensei/SVG-to-ReactNativeSVG" id="contribute"><i class="fa fa-github" aria-hidden="true"></i> Contribute</a>
     </div>
     <div id="editor"></div>
     <script>

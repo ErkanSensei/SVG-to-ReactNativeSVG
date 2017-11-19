@@ -1,3 +1,17 @@
+let expo = false;
+
+function expoCheck(value) {
+    if (value === 'expo') {
+        const expoStyle = document.getElementById('expoButton').style.backgroundColor = '#B71C1C';
+        const rnStyle = document.getElementById('rnButton').style.backgroundColor = '#2B2E35';
+        expo = true;
+    } else {
+        const expoStyle = document.getElementById('expoButton').style.backgroundColor = '#2B2E35';
+        const rnStyle = document.getElementById('rnButton').style.backgroundColor = '#B71C1C';
+        expo = false;
+    }
+}
+
 function parseCSSText(cssText) {
     cssText = cssText.replace('style=', '');
     cssText = cssText.replace(/"/g, '');    
@@ -19,11 +33,10 @@ String.prototype.replaceAt = function(index, replacement) {
 
 function fixSVGText() {
     let text = editor.getValue();
-    const expo = document.querySelector('.filled-in:checked');
 
-    text = text.replace(new RegExp(/\<?(.*?)\?>(.*?)/, 'g'), ''); // remove all xml headers
-    text = text.replace(new RegExp(/\<!(.*?)\->(.*?)/, 'g'), ''); // remove all comments
-    text = text.replace(new RegExp(/\xml(.*?)\"(.*?)\"(.*?)/, 'g'), ''); // remove all xml namespaces
+    text = text.replace(/\<?(.*?)\?>(.*?)/g, ''); // remove all xml headers
+    text = text.replace(/\<!(.*?)\->(.*?)/g, ''); // remove all comments
+    text = text.replace(/\xml(.*?)\"(.*?)\"(.*?)/g, ''); // remove all xml namespaces
     text = text.replace(/\<!(.*?)\>(.*?)/g, '');
     let elements = text.match(/<([\s\S]*?)>/g);
 
@@ -93,8 +106,6 @@ function fixSVGText() {
     text = text.replace(new RegExp('svg', 'g'), 'Svg');
     text = text.replace(new RegExp('stroke-linecap', 'g'), 'strokeLinecap');
     text = text.replace(new RegExp('transform=""', 'g'), '');
-    text = text.replace(new RegExp('defs', 'g'), 'Svg.Defs');
-
 
     let styles = text.match(/style=(["'])(?:(?=(\\?))\2.)*?\1/g);
     let placeHolders = text.match(/style=(["'])(?:(?=(\\?))\2.)*?\1/g);
@@ -113,12 +124,13 @@ function fixSVGText() {
         })
         text = text.replace(placeHolders[i], newStyles);
     }
-    // text = text.replace(new RegExp('styleStroke', 'g'), 'stroke');
+
     text = text.replace(/^\s*\n/gm, '');
     text = text.replace(/ +(?= )/g, ''); // replace multiple spaces with 1 space
     if (expo) {
         text = "import React from 'react'; \nimport { Svg } from 'expo';\n\nexport default (props) => {\n" + text + '}';
     } else {
+        /* Get all components in SVG, ex: G, Path, etc. Add them to imports */
         const tags = text.match(/\<(.*?)\>(.*?)/g);
         const imports = [];
         tags.map(tag => {

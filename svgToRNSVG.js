@@ -33,7 +33,7 @@ String.prototype.replaceAt = function(index, replacement) {
 
 function fixSVGText() {
     let text = editor.getValue();
-
+    text = js_beautify(text, { e4x: true });
     text = text.replace(/\<?(.*?)\?>(.*?)/g, ''); // remove all xml headers
     text = text.replace(/\<!(.*?)\->(.*?)/g, ''); // remove all comments
     text = text.replace(/\xml(.*?)\"(.*?)\"(.*?)/g, ''); // remove all xml namespaces
@@ -63,7 +63,6 @@ function fixSVGText() {
         openTagsNoSpace.map(openTag => {
             const regExpTag = new RegExp(openTag);
             let element = openTag.match(/\<(.*?)\>(.*?)/);
-            console.log(element[1])
             if (element.input.indexOf('svg') === -1 && element.input.indexOf('/') === -1 && element.input.indexOf('Svg') === -1) {
                 const prefix = expo ? '<Svg.' : '<';
                 text = text.replace(regExpTag, prefix + element[1].charAt(0).toUpperCase() + element[1].slice(1) + '>')
@@ -92,12 +91,21 @@ function fixSVGText() {
     if (dashes !== null) {
         dashes.map(dash => {
             const checkDash = dash.split('-');
-            if (isNaN(Number(dash)) && isNaN(Number(checkDash[1][0]))) {
+            console.log(checkDash);
+            let checkDashFirstLetter = checkDash[1][0];
+            if (checkDash[1] === '') {
+                checkDashFirstLetter = false;
+            }
+            else {
+                checkDashFirstLetter = isNaN(Number(checkDash[1][0]));
+            }
+            if (isNaN(Number(dash.replace('-', ''))) && checkDashFirstLetter) {
                 const regExpTag = new RegExp(dash);
                 let element = dash.match(/-/);
                 const index = element['index'];
                 const originalInput = element['input'];
                 element['input'] = element['input'].replace('-', '');
+                console.log(element)
                 element['input'] = element['input'].replaceAt(index, element['input'][index].toUpperCase())
                 text = text.replace(originalInput, element['input'])
             }

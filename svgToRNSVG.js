@@ -173,7 +173,9 @@ function fixSVGText() {
         })
         if (tag.indexOf('<Svg') > -1 
                 && tag.indexOf('width="') === -1
-                && tag.indexOf('height="') === -1) {
+                && tag.indexOf('height="') === -1
+                && tag.indexOf('Svg.') === -1
+            ) {
                 let tempItem = splitTag[0] + ' width={props.width} height={props.height}';
                 text = text.replace(splitTag[0], tempItem);
             }

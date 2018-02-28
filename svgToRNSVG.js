@@ -134,7 +134,7 @@ function fixSVGText() {
     text = text.replace(/^\s*\n/gm, '');
     text = text.replace(/ +(?= )/g, ''); // replace multiple spaces with 1 space
     if (expo) {
-        text = "import React from 'react'; \nimport { Svg } from 'expo';\n\nexport default (props) => {\n" + text + '}';
+        text = "import React from 'react'; \nimport { Svg } from 'expo';\n\nexport default (props) => (\n" + text + ')';
     } else {
         /* Get all components in SVG, ex: G, Path, etc. Add them to imports */
         const tags = text.match(/\<(.*?)\>(.*?)/g);
@@ -151,7 +151,7 @@ function fixSVGText() {
             }
 
         })
-        text = "import React from 'react'; \nimport Svg, { " + imports.join(', ') + " } from 'react-native-svg';\n\nexport default (props) => {\n" + text + '}';
+        text = "import React from 'react'; \nimport Svg, { " + imports.join(', ') + " } from 'react-native-svg';\n\nexport default (props) => (\n" + text + ')';
     }
 
     const tags = text.match(/\<(.*?)\>(.*?)/g);
